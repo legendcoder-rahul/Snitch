@@ -13,6 +13,7 @@ export const validateRegisterUser = [
     body('contact').isMobilePhone().withMessage('Invalid contact number'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
     body('fullname').notEmpty().length({ min: 3, max: 100 }).withMessage('Full name is required'),
+    body('isSeller').isBoolean().withMessage('isSeller must be a boolean value'),
 
 
     validateRequest
