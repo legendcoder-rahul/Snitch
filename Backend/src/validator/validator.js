@@ -10,14 +10,22 @@ function validateRequest(req, res, next) {
 
 export const validateRegisterUser = [
     body('email').isEmail().withMessage('Invalid email address'),
-    body('contact').isMobilePhone().withMessage('Invalid contact number'),
+    body('contact')
+        .trim()
+        .notEmpty().withMessage('Contact number is required')
+        .matches(/^[0-9+()\-\s]{7,20}$/).withMessage('Invalid contact number'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-    body('fullname').notEmpty().length({ min: 3, max: 100 }).withMessage('Full name is required'),
+    body('fullname').notEmpty().isLength({ min: 3, max: 100 }).withMessage('Full name is required'),
     body('isSeller').isBoolean().withMessage('isSeller must be a boolean value'),
 
 
     validateRequest
 ]
 
+export const validateLoginUser = [
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').notEmpty().withMessage('Password is required'),
+    validateRequest
+]
 
 

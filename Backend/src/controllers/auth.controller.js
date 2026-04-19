@@ -1,5 +1,6 @@
 import userModel from '../models/user.model.js';
 import { config } from '../config/config.js'
+import jwt from 'jsonwebtoken';
 
 async function sendTokenResponse(user, res, message) {
     const token = jwt.sign({
@@ -48,5 +49,22 @@ export const register = async (req, res) => {
        await sendTokenResponse(user, res, 'User registered successfully');
     } catch (error) {
         console.error(`Error: ${error.message}`);
+        return res.status(500).json({ message: 'Internal server error' });
     }
+}
+
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await userModel.findOne({ email })
+    if (!user) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    const isMatch = await user.comparePassword(password)
+    if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+    }
+    await sendTokenResponse(user, res, 'User logged in successfully');
+
 }
