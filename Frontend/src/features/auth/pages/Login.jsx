@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useSelector } from 'react-redux'
 import { useAuth } from '../hook/useAuth'
+import GoogleBtn from '../../components/GoogleBtn'
 
 const Login = () => {
   const { handleLogin } = useAuth()
@@ -123,6 +124,7 @@ const Login = () => {
             </div>
 
             {/* Submit */}
+            <GoogleBtn/>
             <button
               type="submit"
               disabled={loading}
@@ -132,7 +134,7 @@ const Login = () => {
             </button>
 
           </form>
-
+          
           {/* Sign Up */}
           <p className="text-center text-sm text-white/30 mt-7">
             Don't have an account?{' '}
