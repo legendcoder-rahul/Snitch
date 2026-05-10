@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useSelector } from 'react-redux'
 import { useAuth } from '../hook/useAuth'
-import GoogleBtn from '../../components/GoogleBtn'
+import GoogleBtn from '../components/GoogleBtn'
 
 const Login = () => {
   const { handleLogin } = useAuth()

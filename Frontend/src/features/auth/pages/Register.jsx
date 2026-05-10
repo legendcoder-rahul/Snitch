@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useSelector } from 'react-redux'
 import { useAuth } from '../hook/useAuth'
+import GoogleBtn from '../components/GoogleBtn'
 
 const Register = () => {
   const { handleRegister } = useAuth()
@@ -223,7 +224,8 @@ const Register = () => {
 
               </div>
             </div>
-
+            
+            <GoogleBtn/>
             {/* Submit */}
             <button
               type="submit"

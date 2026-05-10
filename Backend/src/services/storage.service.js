@@ -1,4 +1,4 @@
-import ImageKit from '@imagekit/nodejs';
+import ImageKit, { toFile } from '@imagekit/nodejs';
 import { config } from '../config/config.js';
 
 const client = new ImageKit({
@@ -6,11 +6,17 @@ const client = new ImageKit({
 });
 
 export async function uploadFile(buffer, fileName, folder = "snitch") {
-    const result = await client.upload({
-        file: await ImageKit.toFile(buffer),
-        fileName,
-        folder
-    })
+  if (!buffer) {
+    throw new Error('Missing file buffer for upload')
+  }
 
-    return result
+  const file = await toFile(buffer, fileName)
+
+  const result = await client.files.upload({
+    file,
+    fileName,
+    folder
+  })
+
+  return result
 }

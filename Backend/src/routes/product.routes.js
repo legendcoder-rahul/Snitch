@@ -3,6 +3,8 @@ import {authenticateSeller} from '../middlewares/auth.middleware.js'
 import { createProduct } from '../controllers/product.controller.js'
 import multer from 'multer'
 import { createProductValidation } from '../validator/product.validator.js'
+import { validateProduct } from '../validator/product.validator.js'
+import { getSellerProducts } from '../controllers/product.controller.js'
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -11,6 +13,8 @@ const upload = multer({
 
 const router = Router()
 
-router.post('/', authenticateSeller, createProductValidation(), upload.array('image', 7), createProduct)
+router.post('/', authenticateSeller, upload.array('images', 7), createProductValidation(), validateProduct, createProduct)
+router.get('/seller', authenticateSeller, getSellerProducts)
+
 
 export default router
