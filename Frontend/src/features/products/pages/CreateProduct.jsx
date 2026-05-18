@@ -1,396 +1,350 @@
-import React, { useState, useRef } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { useProduct } from '../hooks/useProduct.js'
+import React, { useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router';
+import { useProduct } from '../hooks/useProduct';
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR']
-const MAX_IMAGES = 7
+const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP'];
+const MAX_IMAGES = 7;
 
 const CreateProduct = () => {
-  const { handleCreateProduct } = useProduct()
-  const navigate = useNavigate()
-  const fileInputRef = useRef(null)
+    const { handleCreateProduct } = useProduct();
+    const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [isDragging, setIsDragging] = useState(false)
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        priceAmount: '',
+        priceCurrency: 'INR',
+    });
+    const [images, setImages] = useState([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileInputRef = useRef(null);
 
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    priceAmount: '',
-    priceCurrency: 'INR',
-  })
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-  const [images, setImages] = useState([])
-  const [imagePreviews, setImagePreviews] = useState([])
+    const addFiles = (files) => {
+        const remaining = MAX_IMAGES - images.length;
+        if (remaining <= 0) return;
+        const toAdd = Array.from(files).slice(0, remaining);
+        const newImages = toAdd.map(file => ({ file, preview: URL.createObjectURL(file) }));
+        setImages(prev => [...prev, ...newImages]);
+    };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+    const handleFileChange = (e) => {
+        addFiles(e.target.files);
+        e.target.value = '';
+    };
 
-  const handleImageAdd = (files) => {
-    const fileArray = Array.from(files)
-    const remaining = MAX_IMAGES - images.length
-    const toAdd = fileArray.slice(0, remaining)
+    const handleDrop = useCallback((e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+    }, [images]);
 
-    if (toAdd.length === 0) return
+    const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+    const handleDragLeave = () => setIsDragging(false);
 
-    const newImages = [...images, ...toAdd]
-    setImages(newImages)
+    const removeImage = (index) => {
+        setImages(prev => {
+            const updated = [...prev];
+            URL.revokeObjectURL(updated[index].preview);
+            updated.splice(index, 1);
+            return updated;
+        });
+    };
 
-    toAdd.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setImagePreviews((prev) => [...prev, e.target.result])
-      }
-      reader.readAsDataURL(file)
-    })
-  }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const data = new FormData();
+            data.append('title', formData.title);
+            data.append('description', formData.description);
+            data.append('priceAmount', formData.priceAmount);
+            data.append('priceCurrency', formData.priceCurrency);
+            images.forEach(img => data.append('images', img.file));
+            await handleCreateProduct(data);
+            navigate('/');
+        } catch (err) {
+            console.error('Failed to create product', err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-  const handleImageRemove = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index))
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
-  }
+    const inputClass = "w-full bg-transparent outline-none py-4 text-sm transition-colors duration-300 placeholder:text-[#d0c5b5]";
+    const inputStyle = { color: '#1b1c1a', borderBottom: '1px solid #d0c5b5', fontFamily: "'Inter', sans-serif" };
+    const handleFocus = (e) => { e.target.style.borderBottomColor = '#C9A96E'; };
+    const handleBlur = (e) => { e.target.style.borderBottomColor = '#d0c5b5'; };
 
-  const handleDragOver = (e) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    return (
+        <>
+            {/* Google Fonts */}
+            <link
+                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
+                rel="stylesheet"
+            />
 
-  const handleDragLeave = (e) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    setIsDragging(false)
-    if (e.dataTransfer.files) {
-      handleImageAdd(e.dataTransfer.files)
-    }
-  }
-
-  const handleFileSelect = (e) => {
-    if (e.target.files) {
-      handleImageAdd(e.target.files)
-    }
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-
-    if (!form.title.trim()) {
-      setError('Product title is required.')
-      return
-    }
-    if (!form.priceAmount || Number(form.priceAmount) <= 0) {
-      setError('Please enter a valid price.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const formData = new FormData()
-      formData.append('title', form.title)
-      formData.append('description', form.description)
-      formData.append('priceAmount', form.priceAmount)
-      formData.append('priceCurrency', form.priceCurrency)
-      images.forEach((img) => formData.append('images', img))
-
-      await handleCreateProduct(formData)
-      navigate('/')
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
-
-      {/* ── Navbar ── */}
-      <header className="flex items-center justify-between px-10 py-5 border-b border-white/5">
-        <Link to="/" className="text-xl font-bold tracking-tight text-[#d4a017]">
-          Snitch
-        </Link>
-        <nav className="flex items-center gap-8 text-[10px] tracking-[0.18em] uppercase text-white/40 font-medium">
-          <a href="#" className="hover:text-white/70 transition-colors">Dashboard</a>
-          <a href="#" className="text-[#d4a017] hover:text-[#e6b820] transition-colors">Products</a>
-          <a href="#" className="hover:text-white/70 transition-colors">Orders</a>
-        </nav>
-      </header>
-
-      {/* ── Main ── */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-16">
-
-        {/* Heading */}
-        <div className="text-center mb-12">
-          <p className="text-[10px] tracking-[0.22em] uppercase text-white/25 mb-3 font-semibold">
-            New Listing
-          </p>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
-            Create Product
-          </h1>
-          <p className="text-sm text-white/35">
-            Add your product to the marketplace.
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="w-full max-w-2xl bg-[#161616] border border-white/[0.07] rounded-2xl px-8 md:px-10 py-10 md:py-11 shadow-2xl">
-
-          {/* Top accent line */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[#d4a017]/60 to-transparent mb-10" />
-
-          {/* Error */}
-          {error && (
-            <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-
-            {/* ── Title ── */}
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="title"
-                className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium"
-              >
-                Product Title
-              </label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                placeholder="Enter product title"
-                value={form.title}
-                onChange={handleChange}
-                className="bg-transparent border-b border-white/15 py-3 text-base text-white placeholder:text-white/20 focus:outline-none focus:border-[#d4a017]/70 transition-colors"
-              />
-            </div>
-
-            {/* ── Description ── */}
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="description"
-                className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={4}
-                placeholder="Describe your product in detail..."
-                value={form.description}
-                onChange={handleChange}
-                className="bg-transparent border-b border-white/15 py-3 text-base text-white placeholder:text-white/20 focus:outline-none focus:border-[#d4a017]/70 transition-colors resize-none"
-              />
-            </div>
-
-            {/* ── Price Section ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-              {/* Price Amount */}
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="priceAmount"
-                  className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium"
-                >
-                  Price Amount
-                </label>
-                <input
-                  id="priceAmount"
-                  name="priceAmount"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={form.priceAmount}
-                  onChange={handleChange}
-                  className="bg-transparent border-b border-white/15 py-3 text-base text-white placeholder:text-white/20 focus:outline-none focus:border-[#d4a017]/70 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </div>
-
-              {/* Price Currency */}
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="priceCurrency"
-                  className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium"
-                >
-                  Currency
-                </label>
-                <select
-                  id="priceCurrency"
-                  name="priceCurrency"
-                  value={form.priceCurrency}
-                  onChange={handleChange}
-                  className="bg-transparent border-b border-white/15 py-3 text-base text-white focus:outline-none focus:border-[#d4a017]/70 transition-colors cursor-pointer appearance-none"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0 center',
-                    backgroundSize: '1.25rem',
-                  }}
-                >
-                  {CURRENCIES.map((c) => (
-                    <option key={c} value={c} className="bg-[#161616] text-white">
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* ── Image Upload ── */}
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium">
-                  Product Images
-                </label>
-                <span className="text-[10px] tracking-[0.18em] uppercase text-white/25 font-medium">
-                  {images.length}/{MAX_IMAGES}
-                </span>
-              </div>
-
-              {/* Drop Zone */}
-              {images.length < MAX_IMAGES && (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`
-                    flex flex-col items-center justify-center gap-3 py-10 
-                    border-2 border-dashed rounded-xl cursor-pointer
-                    transition-all duration-300
-                    ${isDragging
-                      ? 'border-[#d4a017]/60 bg-[#d4a017]/5'
-                      : 'border-white/10 hover:border-white/20 hover:bg-white/[0.02]'
-                    }
-                  `}
-                >
-                  {/* Cloud Upload Icon */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-8 w-8 transition-colors ${isDragging ? 'text-[#d4a017]/60' : 'text-white/20'}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  <div className="text-center">
-                    <p className="text-sm text-white/40">Click or drag images here</p>
-                    <p className="text-[11px] text-white/20 mt-1">PNG, JPG, WEBP up to 5MB each</p>
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    multiple
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </div>
-              )}
-
-              {/* Image Previews */}
-              {imagePreviews.length > 0 && (
-                <div className="flex flex-wrap gap-3 mt-1">
-                  {imagePreviews.map((src, i) => (
-                    <div key={i} className="relative group">
-                      <div className="w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                        <img
-                          src={src}
-                          alt={`Preview ${i + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {/* Remove Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleImageRemove(i)}
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500/90 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* Empty Slots */}
-                  {Array.from({ length: MAX_IMAGES - imagePreviews.length }).map((_, i) => (
-                    <div
-                      key={`empty-${i}`}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-20 h-20 rounded-lg border border-dashed border-white/10 flex items-center justify-center cursor-pointer hover:border-white/20 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white/15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Empty placeholder slots when no images */}
-              {imagePreviews.length === 0 && (
-                <div className="flex flex-wrap gap-3 mt-1">
-                  {Array.from({ length: MAX_IMAGES }).map((_, i) => (
-                    <div
-                      key={`empty-${i}`}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-20 h-20 rounded-lg border border-dashed border-white/10 flex items-center justify-center cursor-pointer hover:border-white/20 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white/15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ── Submit ── */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#d4a017] hover:bg-[#e6b820] active:bg-[#bf9015] disabled:cursor-not-allowed disabled:opacity-70 text-black font-semibold text-sm py-4 rounded-xl transition-colors tracking-wide mt-2"
+            <div
+                className="min-h-screen selection:bg-[#C9A96E]/30"
+                style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
             >
-              {loading ? 'Creating Product...' : 'Create Product'}
-            </button>
+                <div className="max-w-6xl mx-auto px-8 lg:px-16 xl:px-24">
 
-          </form>
+                    {/* ── Top Bar ── */}
+                    <div className="pt-10 pb-0 flex items-center gap-5">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="text-lg transition-colors duration-200 leading-none"
+                            style={{ color: '#B5ADA3' }}
+                            aria-label="Go back"
+                            onMouseEnter={e => e.currentTarget.style.color = '#C9A96E'}
+                            onMouseLeave={e => e.currentTarget.style.color = '#B5ADA3'}
+                        >
+                            ←
+                        </button>
+                        <span
+                            className="text-xs font-medium tracking-[0.32em] uppercase"
+                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
+                        >
+                            Snitch.
+                        </span>
+                    </div>
 
-          {/* Bottom accent line */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/5 to-transparent mt-10" />
-        </div>
+                    {/* ── Page Header ── */}
+                    <div className="pt-10 pb-0">
+                        <h1
+                            className="text-4xl lg:text-5xl font-light leading-tight"
+                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
+                        >
+                            New Listing
+                        </h1>
+                        {/* Gold rule separator */}
+                        <div className="mt-4 w-14 h-px" style={{ backgroundColor: '#C9A96E' }} />
+                    </div>
 
-      </main>
+                    {/* ── Form ── */}
+                    <form onSubmit={handleSubmit} className="pt-14 pb-24">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 lg:items-start">
 
-      {/* ── Footer ── */}
-      <footer className="py-6 px-8 border-t border-white/[0.04] flex flex-col items-center gap-3">
-        <div className="flex items-center gap-5 text-[11px] tracking-widest uppercase text-white/20">
-          <a href="#" className="hover:text-white/40 transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-white/40 transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-white/40 transition-colors">Help Center</a>
-        </div>
-        <p className="text-[10px] text-white/15">© 2025 Snitch. All rights reserved.</p>
-      </footer>
+                            {/* ── LEFT COLUMN: Text Fields ── */}
+                            <div className="flex flex-col gap-12">
 
-    </div>
-  )
-}
+                                {/* Product Title */}
+                                <div className="flex flex-col gap-2">
+                                    <label
+                                        htmlFor="cp-title"
+                                        className="text-[10px] uppercase tracking-[0.2em] font-medium"
+                                        style={{ color: '#7A6E63' }}
+                                    >
+                                        Product Title
+                                    </label>
+                                    <input
+                                        id="cp-title"
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="e.g. Oversized Linen Shirt"
+                                        className={inputClass}
+                                        style={inputStyle}
+                                        onFocus={handleFocus}
+                                        onBlur={handleBlur}
+                                    />
+                                </div>
 
-export default CreateProduct
+                                {/* Description */}
+                                <div className="flex flex-col gap-2">
+                                    <label
+                                        htmlFor="cp-description"
+                                        className="text-[10px] uppercase tracking-[0.2em] font-medium"
+                                        style={{ color: '#7A6E63' }}
+                                    >
+                                        Description
+                                    </label>
+                                    <textarea
+                                        id="cp-description"
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        rows={5}
+                                        placeholder="Describe the product — material, fit, details..."
+                                        className="w-full bg-transparent outline-none py-4 text-sm transition-colors duration-300 resize-none leading-relaxed placeholder:text-[#d0c5b5]"
+                                        style={inputStyle}
+                                        onFocus={handleFocus}
+                                        onBlur={handleBlur}
+                                    />
+                                </div>
+
+                                {/* Price */}
+                                <div className="flex flex-col gap-3">
+                                    <label className="text-[10px] uppercase tracking-[0.2em] font-medium" style={{ color: '#7A6E63' }}>
+                                        Price
+                                    </label>
+                                    <div className="flex gap-5 items-end">
+                                        {/* Amount */}
+                                        <div className="flex flex-col gap-1 flex-[3]">
+                                            <span className="text-[9px] uppercase tracking-[0.18em]" style={{ color: '#B5ADA3' }}>Amount</span>
+                                            <input
+                                                id="cp-priceAmount"
+                                                type="number"
+                                                name="priceAmount"
+                                                value={formData.priceAmount}
+                                                onChange={handleChange}
+                                                required
+                                                min="0"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                className={inputClass}
+                                                style={inputStyle}
+                                                onFocus={handleFocus}
+                                                onBlur={handleBlur}
+                                            />
+                                        </div>
+                                        {/* Currency */}
+                                        <div className="flex flex-col gap-1 flex-[1]">
+                                            <span className="text-[9px] uppercase tracking-[0.18em]" style={{ color: '#B5ADA3' }}>Currency</span>
+                                            <select
+                                                id="cp-priceCurrency"
+                                                name="priceCurrency"
+                                                value={formData.priceCurrency}
+                                                onChange={handleChange}
+                                                className="w-full bg-transparent outline-none py-4 text-sm cursor-pointer appearance-none transition-colors duration-300"
+                                                style={inputStyle}
+                                                onFocus={handleFocus}
+                                                onBlur={handleBlur}
+                                            >
+                                                {CURRENCIES.map(c => (
+                                                    <option key={c} value={c} style={{ backgroundColor: '#fbf9f6', color: '#1b1c1a' }}>{c}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* ── RIGHT COLUMN: Images ── */}
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] uppercase tracking-[0.2em] font-medium" style={{ color: '#7A6E63' }}>
+                                        Images
+                                    </label>
+                                    <span className="text-[10px]" style={{ color: '#B5ADA3' }}>
+                                        {images.length}/{MAX_IMAGES}
+                                    </span>
+                                </div>
+
+                                {/* Drop Zone */}
+                                {images.length < MAX_IMAGES && (
+                                    <div
+                                        onDrop={handleDrop}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="border border-dashed px-8 py-14 lg:py-20 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300"
+                                        style={{
+                                            borderColor: isDragging ? '#C9A96E' : '#d0c5b5',
+                                            backgroundColor: isDragging ? 'rgba(201,169,110,0.04)' : 'transparent'
+                                        }}
+                                    >
+                                        {/* Upload icon */}
+                                        <div
+                                            className="w-10 h-10 flex items-center justify-center border transition-colors duration-300"
+                                            style={{ borderColor: isDragging ? '#C9A96E' : '#d0c5b5', color: isDragging ? '#C9A96E' : '#B5ADA3' }}
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                            </svg>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-sm leading-relaxed" style={{ color: '#7A6E63' }}>
+                                                Drop images here or{' '}
+                                                <span style={{ color: '#C9A96E', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                                                    tap to upload
+                                                </span>
+                                            </p>
+                                            <p className="text-[10px] uppercase tracking-[0.15em] mt-2" style={{ color: '#B5ADA3' }}>
+                                                Up to {MAX_IMAGES} images
+                                            </p>
+                                        </div>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Image Previews */}
+                                {images.length > 0 && (
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2 mt-1">
+                                        {images.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                className="relative aspect-square overflow-hidden group"
+                                                style={{ backgroundColor: '#eae8e5' }}
+                                            >
+                                                <img
+                                                    src={img.preview}
+                                                    alt={`Preview ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                {/* Remove overlay */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeImage(index)}
+                                                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium tracking-widest uppercase"
+                                                    style={{ backgroundColor: 'rgba(27,24,20,0.55)', color: '#fbf9f6' }}
+                                                    aria-label={`Remove image ${index + 1}`}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* ── Submit Button ── */}
+                        <div className="mt-16 lg:mt-20">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="w-full py-5 text-[11px] uppercase tracking-[0.3em] font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{
+                                    backgroundColor: isSubmitting ? '#7A6E63' : '#1b1c1a',
+                                    color: '#fbf9f6',
+                                    fontFamily: "'Inter', sans-serif"
+                                }}
+                                onMouseEnter={e => {
+                                    if (!isSubmitting) {
+                                        e.currentTarget.style.backgroundColor = '#C9A96E';
+                                        e.currentTarget.style.color = '#1b1c1a';
+                                    }
+                                }}
+                                onMouseLeave={e => {
+                                    if (!isSubmitting) {
+                                        e.currentTarget.style.backgroundColor = '#1b1c1a';
+                                        e.currentTarget.style.color = '#fbf9f6';
+                                    }
+                                }}
+                            >
+                                {isSubmitting ? 'Publishing...' : 'Publish Listing'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default CreateProduct;

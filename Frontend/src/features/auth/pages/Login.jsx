@@ -1,166 +1,255 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { useSelector } from 'react-redux'
-import { useAuth } from '../hook/useAuth'
-import GoogleBtn from '../components/GoogleBtn'
+import React, { useState } from 'react';
+import { useAuth } from "../hook/useAuth";
+import { useNavigate } from "react-router";
+import ContinueWithGoogle from '../components/ContinueWithGoogle';
 
 const Login = () => {
-  const { handleLogin } = useAuth()
-  const { error, loading } = useSelector((state) => state.auth)
-  const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-  })
+    const { handleLogin } = useAuth();
+    const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+    const [ formData, setFormData ] = useState({
+        email: '',
+        password: ''
+    });
+    const [ error, setError ] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const result = await handleLogin({
-      email: form.email,
-      password: form.password,
-    })
-    
-    if (result.success) {
-      navigate('/')
-    }
-  }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [ name ]: value }));
+    };
 
-  // Display user-friendly error message for wrong password
-  const displayError = error ? 'Invalid password' : null
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try {
+            const result = await handleLogin({ email: formData.email, password: formData.password });
+            if (result.success && result.user) {
+                if (result.user.role === "buyer") {
+                    navigate("/");
+                } else if (result.user.role === "seller") {
+                    navigate("/seller/dashboard");
+                }
+            } else {
+                setError(result.error || "Login failed");
+            }
+        } catch (error) {
+            setError(error.message || "Login failed");
+            console.error("Login failed", error);
+        }
+    };
 
-  return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
+    return (
+        <>
+            {/* Google Fonts */}
+            <link
+                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
+                rel="stylesheet"
+            />
 
-      {/* Navbar */}
-      <header className="flex items-center justify-between px-10 py-5 border-b border-white/5">
-        <span className="text-xl font-bold tracking-tight text-[#d4a017]">Snitch</span>
-        <nav className="flex items-center gap-8 text-sm text-white/50">
-          <a href="#" className="hover:text-white/80 transition-colors">Features</a>
-          <a href="#" className="hover:text-white/80 transition-colors">About</a>
-          <Link to="/register" className="text-[#d4a017] hover:text-[#e6b820] transition-colors font-medium">
-            Sign Up
-          </Link>
-        </nav>
-      </header>
-
-      {/* Main */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-16">
-
-        {/* Heading */}
-        <div className="text-center mb-10">
-          <p className="text-xs tracking-[0.22em] uppercase text-white/30 mb-3">Welcome Back</p>
-          <h1 className="text-5xl font-extrabold text-white mb-3 tracking-tight">Sign In</h1>
-          <p className="text-sm text-white/40">Enter your credentials to access your account.</p>
-        </div>
-
-        {/* Card */}
-        <div className="w-full max-w-xl bg-[#161616] border border-white/[0.07] rounded-2xl px-10 py-11 shadow-2xl">
-
-          {/* Top accent line */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[#d4a017]/60 to-transparent mb-9" />
-
-          {displayError && (
-            <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {displayError}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-7">
-
-            {/* Email Address */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium">
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@snitch.com"
-                value={form.email}
-                onChange={handleChange}
-                className="bg-transparent border-b border-white/15 py-3 text-base text-white placeholder:text-white/20 focus:outline-none focus:border-[#d4a017]/70 transition-colors"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-[10px] tracking-[0.18em] uppercase text-white/35 font-medium">
-                Password
-              </label>
-              <div className="relative flex items-center border-b border-white/15 focus-within:border-[#d4a017]/70 transition-colors">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  className="flex-1 bg-transparent py-3 text-base text-white placeholder:text-white/20 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-white/30 hover:text-white/60 transition-colors ml-2"
-                  aria-label="Toggle password visibility"
-                >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-7s4.477-7 10-7a9.956 9.956 0 015.875 1.875M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-3.364l-14.728 14.728" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <GoogleBtn/>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#d4a017] hover:bg-[#e6b820] active:bg-[#bf9015] disabled:cursor-not-allowed disabled:opacity-70 text-black font-semibold text-sm py-4 rounded-xl transition-colors tracking-wide mt-1"
+            <div
+                className="min-h-screen flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
+                style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
+                {/* ── LEFT: Editorial Image Panel ── */}
+                <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#f5f3f0' }}>
+                    <img
+                        src="/snitch_editorial_warm.png"
+                        alt="Snitch Fashion Editorial"
+                        className="absolute inset-0 w-full h-full object-cover object-top"
+                        style={{ filter: 'brightness(0.97)' }}
+                    />
+                    {/* Subtle warm overlay */}
+                    <div
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(to top, rgba(27,24,20,0.62) 0%, rgba(27,24,20,0.08) 45%, transparent 100%)' }}
+                    />
+                    <div className="absolute inset-0 p-14 flex flex-col justify-between z-10">
+                        {/* Brand */}
+                        <span
+                            className="text-sm font-medium tracking-[0.35em] uppercase"
+                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E', letterSpacing: '0.35em' }}
+                        >
+                            Snitch.
+                        </span>
+                        {/* Editorial Headline */}
+                        <div>
+                            <p
+                                className="text-5xl xl:text-6xl font-light leading-[1.08] text-white mb-5"
+                                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                            >
+                                Welcome<br />
+                                <em>back.</em>
+                            </p>
+                            <p className="text-sm font-light leading-relaxed max-w-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                                Sign in to explore the latest exclusive drops and manage your aesthetic.
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-          </form>
-          
-          {/* Sign Up */}
-          <p className="text-center text-sm text-white/30 mt-7">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-[#d4a017] hover:text-[#e6b820] transition-colors font-medium">
-              Sign up
-            </Link>
-          </p>
+                {/* ── RIGHT: Form Panel ── */}
+                <div
+                    className="w-full lg:w-1/2 flex items-center justify-center min-h-screen px-8 sm:px-14 lg:px-20 py-16"
+                    style={{ backgroundColor: '#fbf9f6' }}
+                >
+                    <div className="w-full max-w-sm">
 
-          {/* Bottom accent line */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/5 to-transparent mt-8" />
-        </div>
+                        {/* Mobile brand mark */}
+                        <div className="lg:hidden mb-14">
+                            <span
+                                className="text-sm tracking-[0.35em] uppercase"
+                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
+                            >
+                                Snitch.
+                            </span>
+                        </div>
 
-      </main>
+                        {/* Header */}
+                        <div className="mb-14">
+                            <p
+                                className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
+                                style={{ color: '#C9A96E' }}
+                            >
+                                Sign in to Snitch
+                            </p>
+                            <h1
+                                className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"
+                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
+                            >
+                                Enter the Vault
+                            </h1>
+                        </div>
 
-      {/* Footer */}
-      <footer className="py-6 px-8 border-t border-white/[0.04] flex flex-col items-center gap-3">
-        <div className="flex items-center gap-5 text-[11px] tracking-widest uppercase text-white/20">
-          <a href="#" className="hover:text-white/40 transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-white/40 transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-white/40 transition-colors">Help Center</a>
-        </div>
-        <p className="text-[10px] text-white/15">© 2025 Snitch. All rights reserved.</p>
-      </footer>
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-10">
 
-    </div>
-  )
-}
+                            {/* Error Message */}
+                            {error && (
+                                <div
+                                    className="p-3 text-sm rounded text-center"
+                                    style={{ backgroundColor: '#fde8e8', color: '#c33c3c' }}
+                                >
+                                    {error}
+                                </div>
+                            )}
 
-export default Login
+                            {/* Email */}
+                            <div className="flex flex-col gap-2">
+                                <label
+                                    htmlFor="login-email"
+                                    className="text-[10px] uppercase tracking-[0.18em] font-medium"
+                                    style={{ color: '#7A6E63' }}
+                                >
+                                    Email Address
+                                </label>
+                                <input
+                                    id="login-email"
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="hello@example.com"
+                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
+                                    style={{
+                                        color: '#1b1c1a',
+                                        borderBottom: '1px solid #d0c5b5',
+                                        fontFamily: "'Inter', sans-serif"
+                                    }}
+                                    onFocus={e => e.target.style.borderBottomColor = '#C9A96E'}
+                                    onBlur={e => e.target.style.borderBottomColor = '#d0c5b5'}
+                                />
+                            </div>
+
+                            {/* Password */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="login-password"
+                                        className="text-[10px] uppercase tracking-[0.18em] font-medium"
+                                        style={{ color: '#7A6E63' }}
+                                    >
+                                        Password
+                                    </label>
+                                    <a
+                                        href="#"
+                                        className="text-[10px] transition-colors duration-200"
+                                        style={{ color: '#B5ADA3' }}
+                                        onMouseEnter={e => e.target.style.color = '#C9A96E'}
+                                        onMouseLeave={e => e.target.style.color = '#B5ADA3'}
+                                    >
+                                        Forgot password?
+                                    </a>
+                                </div>
+                                <input
+                                    id="login-password"
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
+                                    style={{
+                                        color: '#1b1c1a',
+                                        borderBottom: '1px solid #d0c5b5',
+                                        fontFamily: "'Inter', sans-serif"
+                                    }}
+                                    onFocus={e => e.target.style.borderBottomColor = '#C9A96E'}
+                                    onBlur={e => e.target.style.borderBottomColor = '#d0c5b5'}
+                                />
+                            </div>
+
+                            {/* Sign In Button */}
+                            <button
+                                type="submit"
+                                className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
+                                style={{
+                                    backgroundColor: '#1b1c1a',
+                                    color: '#fbf9f6',
+                                    fontFamily: "'Inter', sans-serif"
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.backgroundColor = '#C9A96E';
+                                    e.currentTarget.style.color = '#1b1c1a';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.backgroundColor = '#1b1c1a';
+                                    e.currentTarget.style.color = '#fbf9f6';
+                                }}
+                            >
+                                Sign In
+                            </button>
+
+                            {/* Divider */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
+                                <span className="text-[10px] uppercase tracking-[0.15em]" style={{ color: '#B5ADA3' }}>or</span>
+                                <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
+                            </div>
+
+                            {/* Google SSO */}
+                            <ContinueWithGoogle />
+
+                            {/* Footer Link */}
+                            <p className="text-center text-[11px]" style={{ color: '#B5ADA3' }}>
+                                Don&apos;t have an account?{' '}
+                                <a
+                                    href="/register"
+                                    className="transition-colors duration-200"
+                                    style={{ color: '#7A6E63', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                                    onMouseEnter={e => e.target.style.color = '#C9A96E'}
+                                    onMouseLeave={e => e.target.style.color = '#7A6E63'}
+                                >
+                                    Sign up
+                                </a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default Login;
