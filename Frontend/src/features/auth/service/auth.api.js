@@ -32,3 +32,14 @@ export async function login({ email, password }) {
         throw new Error(message)
     }
 }
+
+export async function getMe() {
+    try {
+        const response = await api.get('/me')
+        return response.data
+    } catch (error) {
+        const message = error.response?.data?.message || error.message
+        throw new Error(message)
+    }
+}
+
