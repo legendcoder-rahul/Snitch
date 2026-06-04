@@ -40,7 +40,7 @@ const Nav = () => {
             <div className="flex items-center gap-2 md:gap-4 text-gray-600">
                 {/* Cart Icon */}
                 <button 
-                    onClick={() => user ? navigate('/seller/cart') : navigate('/login')}
+                    onClick={() => user ? navigate('/cart') : navigate('/login')}
                     className="hover:text-black p-1.5 md:p-2 rounded-full hover:bg-gray-100 transition relative"
                     title="Cart"
                 >

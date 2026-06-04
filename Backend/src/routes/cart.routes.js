@@ -16,6 +16,7 @@ const router = express.Router();
  * @argument quantity - Quantity of the item to add (optional, default: 1)
  */
 router.post("/add/:productId/:variantId", authenticateUser, validateAddToCart, addToCart)
+router.post("/add/:productId", authenticateUser, validateAddToCart, addToCart)
 
 
 

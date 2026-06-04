@@ -75,275 +75,187 @@ const CreateProduct = () => {
         }
     };
 
-    const inputClass = "w-full bg-transparent outline-none py-4 text-sm transition-colors duration-300 placeholder:text-[#d0c5b5]";
-    const inputStyle = { color: '#1b1c1a', borderBottom: '1px solid #d0c5b5', fontFamily: "'Inter', sans-serif" };
-    const handleFocus = (e) => { e.target.style.borderBottomColor = '#C9A96E'; };
-    const handleBlur = (e) => { e.target.style.borderBottomColor = '#d0c5b5'; };
-
     return (
-        <>
-            {/* Google Fonts */}
-            <link
-                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
-                rel="stylesheet"
-            />
+        <div className="min-h-screen bg-white font-sans text-gray-900 antialiased">
+            <div className="max-w-[1200px] mx-auto px-6 py-10 lg:py-16">
 
-            <div
-                className="min-h-screen selection:bg-[#C9A96E]/30"
-                style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
-            >
-                <div className="max-w-6xl mx-auto px-8 lg:px-16 xl:px-24">
+                {/* ── Breadcrumb / Back ── */}
+                <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-8">
+                    <button onClick={() => navigate('/')} className="hover:text-gray-700 transition bg-transparent border-none cursor-pointer p-0 font-inherit text-xs text-gray-400">Home</button>
+                    <span>›</span>
+                    <button onClick={() => navigate('/seller/dashboard')} className="hover:text-gray-700 transition bg-transparent border-none cursor-pointer p-0 font-inherit text-xs text-gray-400">Dashboard</button>
+                    <span>›</span>
+                    <span className="text-gray-700">New Listing</span>
+                </nav>
 
-                    {/* ── Top Bar ── */}
-                    <div className="pt-10 pb-0 flex items-center gap-5">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="text-lg transition-colors duration-200 leading-none"
-                            style={{ color: '#B5ADA3' }}
-                            aria-label="Go back"
-                            onMouseEnter={e => e.currentTarget.style.color = '#C9A96E'}
-                            onMouseLeave={e => e.currentTarget.style.color = '#B5ADA3'}
-                        >
-                            ←
-                        </button>
-                        <span
-                            className="text-xs font-medium tracking-[0.32em] uppercase"
-                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
-                        >
-                            Snitch.
-                        </span>
-                    </div>
+                {/* ── Page Header ── */}
+                <div className="mb-10">
+                    <p className="text-xs font-bold uppercase tracking-[0.3em] text-gray-400 mb-2">Create Product</p>
+                    <h1 className="text-4xl md:text-5xl font-black uppercase text-gray-900 leading-tight">
+                        New Listing
+                    </h1>
+                </div>
 
-                    {/* ── Page Header ── */}
-                    <div className="pt-10 pb-0">
-                        <h1
-                            className="text-4xl lg:text-5xl font-light leading-tight"
-                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
-                        >
-                            New Listing
-                        </h1>
-                        {/* Gold rule separator */}
-                        <div className="mt-4 w-14 h-px" style={{ backgroundColor: '#C9A96E' }} />
-                    </div>
+                {/* ── Form ── */}
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
 
-                    {/* ── Form ── */}
-                    <form onSubmit={handleSubmit} className="pt-14 pb-24">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 lg:items-start">
+                        {/* ── LEFT COLUMN: Text Fields ── */}
+                        <div className="flex flex-col gap-8">
 
-                            {/* ── LEFT COLUMN: Text Fields ── */}
-                            <div className="flex flex-col gap-12">
-
-                                {/* Product Title */}
-                                <div className="flex flex-col gap-2">
-                                    <label
-                                        htmlFor="cp-title"
-                                        className="text-[10px] uppercase tracking-[0.2em] font-medium"
-                                        style={{ color: '#7A6E63' }}
-                                    >
-                                        Product Title
-                                    </label>
-                                    <input
-                                        id="cp-title"
-                                        type="text"
-                                        name="title"
-                                        value={formData.title}
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="e.g. Oversized Linen Shirt"
-                                        className={inputClass}
-                                        style={inputStyle}
-                                        onFocus={handleFocus}
-                                        onBlur={handleBlur}
-                                    />
-                                </div>
-
-                                {/* Description */}
-                                <div className="flex flex-col gap-2">
-                                    <label
-                                        htmlFor="cp-description"
-                                        className="text-[10px] uppercase tracking-[0.2em] font-medium"
-                                        style={{ color: '#7A6E63' }}
-                                    >
-                                        Description
-                                    </label>
-                                    <textarea
-                                        id="cp-description"
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleChange}
-                                        rows={5}
-                                        placeholder="Describe the product — material, fit, details..."
-                                        className="w-full bg-transparent outline-none py-4 text-sm transition-colors duration-300 resize-none leading-relaxed placeholder:text-[#d0c5b5]"
-                                        style={inputStyle}
-                                        onFocus={handleFocus}
-                                        onBlur={handleBlur}
-                                    />
-                                </div>
-
-                                {/* Price */}
-                                <div className="flex flex-col gap-3">
-                                    <label className="text-[10px] uppercase tracking-[0.2em] font-medium" style={{ color: '#7A6E63' }}>
-                                        Price
-                                    </label>
-                                    <div className="flex gap-5 items-end">
-                                        {/* Amount */}
-                                        <div className="flex flex-col gap-1 flex-[3]">
-                                            <span className="text-[9px] uppercase tracking-[0.18em]" style={{ color: '#B5ADA3' }}>Amount</span>
-                                            <input
-                                                id="cp-priceAmount"
-                                                type="number"
-                                                name="priceAmount"
-                                                value={formData.priceAmount}
-                                                onChange={handleChange}
-                                                required
-                                                min="0"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                className={inputClass}
-                                                style={inputStyle}
-                                                onFocus={handleFocus}
-                                                onBlur={handleBlur}
-                                            />
-                                        </div>
-                                        {/* Currency */}
-                                        <div className="flex flex-col gap-1 flex-[1]">
-                                            <span className="text-[9px] uppercase tracking-[0.18em]" style={{ color: '#B5ADA3' }}>Currency</span>
-                                            <select
-                                                id="cp-priceCurrency"
-                                                name="priceCurrency"
-                                                value={formData.priceCurrency}
-                                                onChange={handleChange}
-                                                className="w-full bg-transparent outline-none py-4 text-sm cursor-pointer appearance-none transition-colors duration-300"
-                                                style={inputStyle}
-                                                onFocus={handleFocus}
-                                                onBlur={handleBlur}
-                                            >
-                                                {CURRENCIES.map(c => (
-                                                    <option key={c} value={c} style={{ backgroundColor: '#fbf9f6', color: '#1b1c1a' }}>{c}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+                            {/* Product Title */}
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="cp-title" className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                                    Product Title
+                                </label>
+                                <input
+                                    id="cp-title"
+                                    type="text"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="e.g. Oversized Linen Shirt"
+                                    className="w-full bg-transparent outline-none py-3 text-sm border-b-2 border-gray-200 focus:border-black transition-colors duration-200 placeholder:text-gray-300"
+                                />
                             </div>
 
-                            {/* ── RIGHT COLUMN: Images ── */}
-                            <div className="flex flex-col gap-4">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-[10px] uppercase tracking-[0.2em] font-medium" style={{ color: '#7A6E63' }}>
-                                        Images
-                                    </label>
-                                    <span className="text-[10px]" style={{ color: '#B5ADA3' }}>
-                                        {images.length}/{MAX_IMAGES}
-                                    </span>
-                                </div>
+                            {/* Description */}
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="cp-description" className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                                    Description
+                                </label>
+                                <textarea
+                                    id="cp-description"
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows={5}
+                                    placeholder="Describe the product — material, fit, details..."
+                                    className="w-full bg-transparent outline-none py-3 text-sm border-b-2 border-gray-200 focus:border-black transition-colors duration-200 resize-none leading-relaxed placeholder:text-gray-300"
+                                />
+                            </div>
 
-                                {/* Drop Zone */}
-                                {images.length < MAX_IMAGES && (
-                                    <div
-                                        onDrop={handleDrop}
-                                        onDragOver={handleDragOver}
-                                        onDragLeave={handleDragLeave}
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="border border-dashed px-8 py-14 lg:py-20 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300"
-                                        style={{
-                                            borderColor: isDragging ? '#C9A96E' : '#d0c5b5',
-                                            backgroundColor: isDragging ? 'rgba(201,169,110,0.04)' : 'transparent'
-                                        }}
-                                    >
-                                        {/* Upload icon */}
-                                        <div
-                                            className="w-10 h-10 flex items-center justify-center border transition-colors duration-300"
-                                            style={{ borderColor: isDragging ? '#C9A96E' : '#d0c5b5', color: isDragging ? '#C9A96E' : '#B5ADA3' }}
-                                        >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                            </svg>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-sm leading-relaxed" style={{ color: '#7A6E63' }}>
-                                                Drop images here or{' '}
-                                                <span style={{ color: '#C9A96E', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-                                                    tap to upload
-                                                </span>
-                                            </p>
-                                            <p className="text-[10px] uppercase tracking-[0.15em] mt-2" style={{ color: '#B5ADA3' }}>
-                                                Up to {MAX_IMAGES} images
-                                            </p>
-                                        </div>
+                            {/* Price */}
+                            <div className="flex flex-col gap-3">
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Price</label>
+                                <div className="flex gap-4 items-end">
+                                    {/* Amount */}
+                                    <div className="flex flex-col gap-1 flex-[3]">
+                                        <span className="text-[10px] uppercase tracking-wider text-gray-400">Amount</span>
                                         <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            multiple
-                                            onChange={handleFileChange}
-                                            className="hidden"
+                                            id="cp-priceAmount"
+                                            type="number"
+                                            name="priceAmount"
+                                            value={formData.priceAmount}
+                                            onChange={handleChange}
+                                            required
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            className="w-full bg-transparent outline-none py-3 text-sm border-b-2 border-gray-200 focus:border-black transition-colors duration-200 placeholder:text-gray-300"
                                         />
                                     </div>
-                                )}
-
-                                {/* Image Previews */}
-                                {images.length > 0 && (
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2 mt-1">
-                                        {images.map((img, index) => (
-                                            <div
-                                                key={index}
-                                                className="relative aspect-square overflow-hidden group"
-                                                style={{ backgroundColor: '#eae8e5' }}
-                                            >
-                                                <img
-                                                    src={img.preview}
-                                                    alt={`Preview ${index + 1}`}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                {/* Remove overlay */}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeImage(index)}
-                                                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium tracking-widest uppercase"
-                                                    style={{ backgroundColor: 'rgba(27,24,20,0.55)', color: '#fbf9f6' }}
-                                                    aria-label={`Remove image ${index + 1}`}
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        ))}
+                                    {/* Currency */}
+                                    <div className="flex flex-col gap-1 flex-[1]">
+                                        <span className="text-[10px] uppercase tracking-wider text-gray-400">Currency</span>
+                                        <select
+                                            id="cp-priceCurrency"
+                                            name="priceCurrency"
+                                            value={formData.priceCurrency}
+                                            onChange={handleChange}
+                                            className="w-full bg-transparent outline-none py-3 text-sm cursor-pointer appearance-none border-b-2 border-gray-200 focus:border-black transition-colors duration-200"
+                                        >
+                                            {CURRENCIES.map(c => (
+                                                <option key={c} value={c}>{c}</option>
+                                            ))}
+                                        </select>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* ── Submit Button ── */}
-                        <div className="mt-16 lg:mt-20">
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full py-5 text-[11px] uppercase tracking-[0.3em] font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={{
-                                    backgroundColor: isSubmitting ? '#7A6E63' : '#1b1c1a',
-                                    color: '#fbf9f6',
-                                    fontFamily: "'Inter', sans-serif"
-                                }}
-                                onMouseEnter={e => {
-                                    if (!isSubmitting) {
-                                        e.currentTarget.style.backgroundColor = '#C9A96E';
-                                        e.currentTarget.style.color = '#1b1c1a';
-                                    }
-                                }}
-                                onMouseLeave={e => {
-                                    if (!isSubmitting) {
-                                        e.currentTarget.style.backgroundColor = '#1b1c1a';
-                                        e.currentTarget.style.color = '#fbf9f6';
-                                    }
-                                }}
-                            >
-                                {isSubmitting ? 'Publishing...' : 'Publish Listing'}
-                            </button>
+                        {/* ── RIGHT COLUMN: Images ── */}
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Images</label>
+                                <span className="text-xs text-gray-400">{images.length}/{MAX_IMAGES}</span>
+                            </div>
+
+                            {/* Drop Zone */}
+                            {images.length < MAX_IMAGES && (
+                                <div
+                                    onDrop={handleDrop}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`border-2 border-dashed rounded-xl px-8 py-14 lg:py-20 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 ${isDragging ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400'
+                                        }`}
+                                >
+                                    <div className={`w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isDragging ? 'bg-black text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">
+                                            Drop images here or{' '}
+                                            <span className="text-black font-semibold underline underline-offset-2">tap to upload</span>
+                                        </p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-2">Up to {MAX_IMAGES} images</p>
+                                    </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Image Previews */}
+                            {images.length > 0 && (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2 mt-1">
+                                    {images.map((img, index) => (
+                                        <div
+                                            key={index}
+                                            className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 group"
+                                        >
+                                            <img
+                                                src={img.preview}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-bold tracking-widest uppercase bg-black/50 text-white"
+                                                aria-label={`Remove image ${index + 1}`}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    {/* ── Submit Button ── */}
+                    <div className="mt-12 lg:mt-16">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full py-4 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting ? 'Publishing...' : 'Publish Listing'}
+                        </button>
+                    </div>
+                </form>
             </div>
-        </>
+        </div>
     );
 };
 

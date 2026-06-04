@@ -19,15 +19,26 @@ export async function getCartDetails(userId) {
         },
         { $unwind: { path: '$items.product' } },
         {
-            $unwind: { path: '$items.product.variants' }
-        },
-        {
-            $match: {
-                $expr: {
-                    $eq: [
-                        '$items.variant',
-                        '$items.product.variants._id'
-                    ]
+            // For items WITH a variant, find the matching variant
+            // For items WITHOUT a variant, keep the item as-is
+            $addFields: {
+                'items.matchedVariant': {
+                    $cond: {
+                        if: { $ifNull: ['$items.variant', false] },
+                        then: {
+                            $arrayElemAt: [
+                                {
+                                    $filter: {
+                                        input: '$items.product.variants',
+                                        as: 'v',
+                                        cond: { $eq: ['$$v._id', '$items.variant'] }
+                                    }
+                                },
+                                0
+                            ]
+                        },
+                        else: null
+                    }
                 }
             }
         },
@@ -37,11 +48,20 @@ export async function getCartDetails(userId) {
                     price: {
                         $multiply: [
                             '$items.quantity',
-                            '$items.product.variants.price.amount'
+                            {
+                                $ifNull: [
+                                    '$items.matchedVariant.price.amount',
+                                    { $ifNull: ['$items.price.amount', '$items.product.price.amount'] }
+                                ]
+                            }
                         ]
                     },
-                    currency:
-                        '$items.product.variants.price.currency'
+                    currency: {
+                        $ifNull: [
+                            '$items.matchedVariant.price.currency',
+                            { $ifNull: ['$items.price.currency', '$items.product.price.currency'] }
+                        ]
+                    }
                 }
             }
         },
@@ -55,7 +75,7 @@ export async function getCartDetails(userId) {
                 items: { $push: '$items' }
             }
         }
-    ]))[ 0 ]
+    ]))[0]
 
     return cart
 }
