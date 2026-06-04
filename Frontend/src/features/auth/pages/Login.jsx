@@ -7,15 +7,14 @@ const Login = () => {
     const { handleLogin } = useAuth();
     const navigate = useNavigate();
 
-    const [ formData, setFormData ] = useState({
-        email: '',
-        password: ''
-    });
-    const [ error, setError ] = useState('');
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [focused, setFocused] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [ name ]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -24,121 +23,174 @@ const Login = () => {
         try {
             const result = await handleLogin({ email: formData.email, password: formData.password });
             if (result.success && result.user) {
-                if (result.user.role === "buyer") {
-                    navigate("/");
-                } else if (result.user.role === "seller") {
-                    navigate("/seller/dashboard");
-                }
+                result.user.role === 'seller' ? navigate('/seller/dashboard') : navigate('/');
             } else {
-                setError(result.error || "Login failed");
+                setError(result.error || 'Login failed');
             }
-        } catch (error) {
-            setError(error.message || "Login failed");
-            console.error("Login failed", error);
+        } catch (err) {
+            setError(err.message || 'Login failed');
         }
     };
 
     return (
         <>
-            {/* Google Fonts */}
-            <link
-                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
-                rel="stylesheet"
-            />
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-            <div
-                className="min-h-screen flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
-                style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
-            >
-                {/* ── LEFT: Editorial Image Panel ── */}
-                <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#f5f3f0' }}>
-                    <img
-                        src="/snitch_editorial_warm.png"
-                        alt="Snitch Fashion Editorial"
-                        className="absolute inset-0 w-full h-full object-cover object-top"
-                        style={{ filter: 'brightness(0.97)' }}
-                    />
-                    {/* Subtle warm overlay */}
-                    <div
-                        className="absolute inset-0"
-                        style={{ background: 'linear-gradient(to top, rgba(27,24,20,0.62) 0%, rgba(27,24,20,0.08) 45%, transparent 100%)' }}
-                    />
-                    <div className="absolute inset-0 p-14 flex flex-col justify-between z-10">
-                        {/* Brand */}
-                        <span
-                            className="text-sm font-medium tracking-[0.35em] uppercase"
-                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E', letterSpacing: '0.35em' }}
+                .Snitch-input {
+                    background: transparent;
+                    border: none;
+                    border-bottom: 1.5px solid #d4d4d4;
+                    outline: none;
+                    width: 100%;
+                    padding: 12px 0;
+                    font-size: 13px;
+                    font-family: 'DM Sans', sans-serif;
+                    color: #111;
+                    transition: border-color 0.2s;
+                }
+                .Snitch-input:focus { border-bottom-color: #111; }
+                .Snitch-input::placeholder { color: #aaa; }
+
+                .marquee-track {
+                    display: flex;
+                    width: max-content;
+                    animation: marquee-up 14s linear infinite;
+                }
+                @keyframes marquee-up {
+                    from { transform: translateY(0); }
+                    to   { transform: translateY(-50%); }
+                }
+
+                .btn-submit {
+                    position: relative;
+                    overflow: hidden;
+                    background: #111;
+                    color: #fff;
+                    transition: color 0.3s;
+                }
+                .btn-submit::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: #fff;
+                    transform: translateX(-101%);
+                    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+                    z-index: 0;
+                }
+                .btn-submit:hover::after { transform: translateX(0); }
+                .btn-submit:hover { color: #111; }
+                .btn-submit span { position: relative; z-index: 1; }
+            `}</style>
+
+            <div className="min-h-screen flex flex-row" style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: '#f8f8f6' }}>
+
+                {/* ── LEFT: Editorial Panel ─────────────────────── */}
+                <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] relative overflow-hidden bg-[#111] flex-col">
+
+                    {/* Vertical marquee background text */}
+                    <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.04] pointer-events-none select-none">
+                        <div
+                            className="marquee-track flex-col text-white text-[7rem] font-black uppercase leading-none tracking-tighter"
+                            style={{ fontFamily: "'Bebas Neue', sans-serif", writingMode: 'vertical-rl' }}
                         >
-                            Snitch.
-                        </span>
-                        {/* Editorial Headline */}
+                            {Array(6).fill('Snitch FASHION ').map((t, i) => <span key={i}>{t}</span>)}
+                            {Array(6).fill('Snitch FASHION ').map((t, i) => <span key={`b${i}`}>{t}</span>)}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col h-full p-12 xl:p-16">
+
+                        {/* Logo */}
                         <div>
-                            <p
-                                className="text-5xl xl:text-6xl font-light leading-[1.08] text-white mb-5"
-                                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                            <span
+                                className="text-white text-xl font-black uppercase"
+                                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.25em' }}
                             >
-                                Welcome<br />
-                                <em>back.</em>
-                            </p>
-                            <p className="text-sm font-light leading-relaxed max-w-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                                Snitch
+                            </span>
+                        </div>
+
+                        {/* Hero text */}
+                        <div className="flex-1 flex flex-col justify-center">
+                            <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-6">Welcome Back</p>
+                            <h2
+                                className="text-7xl xl:text-8xl font-black uppercase leading-[0.88] text-white mb-8"
+                                style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                            >
+                                GOOD<br/>TO<br/>SEE YOU<br/>AGAIN
+                            </h2>
+                            <p className="text-xs text-gray-500 leading-relaxed max-w-[220px]">
                                 Sign in to explore the latest exclusive drops and manage your aesthetic.
                             </p>
                         </div>
+
+                        {/* Bottom stats */}
+                        <div className="flex gap-8 border-t border-gray-800 pt-8">
+                            {[['50K+', 'Members'], ['200+', 'Brands'], ['98%', 'Satisfaction']].map(([num, label]) => (
+                                <div key={label}>
+                                    <p
+                                        className="text-white font-black mb-0.5"
+                                        style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: '0.05em' }}
+                                    >
+                                        {num}
+                                    </p>
+                                    <p className="text-[10px] uppercase tracking-widest text-gray-600">{label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Faint corner image */}
+                    <div className="absolute bottom-0 right-0 w-48 h-64 opacity-20">
+                        <img src="/snitch_editorial_warm.png" alt="" className="w-full h-full object-cover object-top"/>
                     </div>
                 </div>
 
-                {/* ── RIGHT: Form Panel ── */}
-                <div
-                    className="w-full lg:w-1/2 flex items-center justify-center min-h-screen px-8 sm:px-14 lg:px-20 py-16"
-                    style={{ backgroundColor: '#fbf9f6' }}
-                >
-                    <div className="w-full max-w-sm">
+                {/* ── RIGHT: Form Panel ─────────────────────────── */}
+                <div className="w-full lg:w-[55%] xl:w-[58%] flex items-center justify-center min-h-screen px-6 sm:px-12 lg:px-16 xl:px-24 py-14 bg-[#f8f8f6]">
+                    <div className="w-full max-w-[400px]">
 
-                        {/* Mobile brand mark */}
-                        <div className="lg:hidden mb-14">
+                        {/* Mobile logo */}
+                        <div className="lg:hidden mb-10">
                             <span
-                                className="text-sm tracking-[0.35em] uppercase"
-                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
+                                className="text-2xl font-black uppercase text-gray-900"
+                                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.2em' }}
                             >
-                                Snitch.
+                                Snitch
                             </span>
                         </div>
 
                         {/* Header */}
-                        <div className="mb-14">
-                            <p
-                                className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
-                                style={{ color: '#C9A96E' }}
-                            >
-                                Sign in to Snitch
+                        <div className="mb-10">
+                            <p className="text-[10px] uppercase tracking-[0.28em] text-gray-400 font-medium mb-3">
+                                Sign In
                             </p>
                             <h1
-                                className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"
-                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
+                                className="text-4xl xl:text-5xl font-black uppercase leading-tight text-gray-900"
+                                style={{ fontFamily: "'Bebas Neue', sans-serif" }}
                             >
-                                Enter the Vault
+                                Welcome Back
                             </h1>
                         </div>
 
-                        {/* Form */}
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+                        {/* Error */}
+                        {error && (
+                            <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-xs text-red-600 uppercase tracking-wider">
+                                {error}
+                            </div>
+                        )}
 
-                            {/* Error Message */}
-                            {error && (
-                                <div
-                                    className="p-3 text-sm rounded text-center"
-                                    style={{ backgroundColor: '#fde8e8', color: '#c33c3c' }}
-                                >
-                                    {error}
-                                </div>
-                            )}
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-7">
 
                             {/* Email */}
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-1.5">
                                 <label
                                     htmlFor="login-email"
-                                    className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                                    style={{ color: '#7A6E63' }}
+                                    className="text-[10px] uppercase tracking-[0.2em] font-semibold transition-colors"
+                                    style={{ color: focused === 'email' ? '#111' : '#999' }}
                                 >
                                     Email Address
                                 </label>
@@ -150,98 +202,77 @@ const Login = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="hello@example.com"
-                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
-                                    style={{
-                                        color: '#1b1c1a',
-                                        borderBottom: '1px solid #d0c5b5',
-                                        fontFamily: "'Inter', sans-serif"
-                                    }}
-                                    onFocus={e => e.target.style.borderBottomColor = '#C9A96E'}
-                                    onBlur={e => e.target.style.borderBottomColor = '#d0c5b5'}
+                                    className="Snitch-input"
+                                    onFocus={() => setFocused('email')}
+                                    onBlur={() => setFocused('')}
                                 />
                             </div>
 
                             {/* Password */}
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-1.5">
                                 <div className="flex items-center justify-between">
                                     <label
                                         htmlFor="login-password"
-                                        className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                                        style={{ color: '#7A6E63' }}
+                                        className="text-[10px] uppercase tracking-[0.2em] font-semibold transition-colors"
+                                        style={{ color: focused === 'password' ? '#111' : '#999' }}
                                     >
                                         Password
                                     </label>
                                     <a
                                         href="#"
-                                        className="text-[10px] transition-colors duration-200"
-                                        style={{ color: '#B5ADA3' }}
-                                        onMouseEnter={e => e.target.style.color = '#C9A96E'}
-                                        onMouseLeave={e => e.target.style.color = '#B5ADA3'}
+                                        className="text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-900 transition"
                                     >
-                                        Forgot password?
+                                        Forgot?
                                     </a>
                                 </div>
-                                <input
-                                    id="login-password"
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="••••••••"
-                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
-                                    style={{
-                                        color: '#1b1c1a',
-                                        borderBottom: '1px solid #d0c5b5',
-                                        fontFamily: "'Inter', sans-serif"
-                                    }}
-                                    onFocus={e => e.target.style.borderBottomColor = '#C9A96E'}
-                                    onBlur={e => e.target.style.borderBottomColor = '#d0c5b5'}
-                                />
+                                <div className="relative">
+                                    <input
+                                        id="login-password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="••••••••"
+                                        className="Snitch-input"
+                                        onFocus={() => setFocused('password')}
+                                        onBlur={() => setFocused('')}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(p => !p)}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-900 transition"
+                                    >
+                                        {showPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* Sign In Button */}
-                            <button
-                                type="submit"
-                                className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
-                                style={{
-                                    backgroundColor: '#1b1c1a',
-                                    color: '#fbf9f6',
-                                    fontFamily: "'Inter', sans-serif"
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.backgroundColor = '#C9A96E';
-                                    e.currentTarget.style.color = '#1b1c1a';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.backgroundColor = '#1b1c1a';
-                                    e.currentTarget.style.color = '#fbf9f6';
-                                }}
-                            >
-                                Sign In
+                            {/* Submit */}
+                            <button type="submit" className="btn-submit w-full py-4 mt-1 border border-black">
+                                <span className="text-[11px] uppercase tracking-[0.28em] font-semibold">
+                                    Sign In
+                                </span>
                             </button>
 
                             {/* Divider */}
                             <div className="flex items-center gap-4">
-                                <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
-                                <span className="text-[10px] uppercase tracking-[0.15em]" style={{ color: '#B5ADA3' }}>or</span>
-                                <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
+                                <div className="flex-1 h-px bg-gray-200"/>
+                                <span className="text-[10px] uppercase tracking-widest text-gray-400">or</span>
+                                <div className="flex-1 h-px bg-gray-200"/>
                             </div>
 
-                            {/* Google SSO */}
+                            {/* Google */}
                             <ContinueWithGoogle />
 
-                            {/* Footer Link */}
-                            <p className="text-center text-[11px]" style={{ color: '#B5ADA3' }}>
-                                Don&apos;t have an account?{' '}
+                            {/* Sign up link */}
+                            <p className="text-center text-[11px] text-gray-400">
+                                Don't have an account?{' '}
                                 <a
                                     href="/register"
-                                    className="transition-colors duration-200"
-                                    style={{ color: '#7A6E63', textDecoration: 'underline', textUnderlineOffset: '3px' }}
-                                    onMouseEnter={e => e.target.style.color = '#C9A96E'}
-                                    onMouseLeave={e => e.target.style.color = '#7A6E63'}
+                                    className="text-gray-900 font-semibold uppercase tracking-wider underline underline-offset-4 hover:text-gray-500 transition"
                                 >
-                                    Sign up
+                                    Sign Up
                                 </a>
                             </p>
                         </form>

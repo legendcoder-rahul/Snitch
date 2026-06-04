@@ -81,7 +81,16 @@ const SellerProductDetails = () => {
     setLocalVariants([ ...localVariants, variantToSave ]);
     setIsAddingVariant(false);
 
-    await handleAddProductVariant(productId, variantToSave)
+    try {
+      const updatedProduct = await handleAddProductVariant(productId, variantToSave)
+      if (updatedProduct) {
+        if (updatedProduct.variants) setLocalVariants(updatedProduct.variants)
+        setProduct(updatedProduct)
+      }
+    } catch (err) {
+      console.error('Failed to save variant', err)
+      alert('Failed to save variant. Check console for details.')
+    }
 
     // Reset form
     // Note: should ideally revoke old object URLs as well to prevent memory leaks if it were a long-lived SPA

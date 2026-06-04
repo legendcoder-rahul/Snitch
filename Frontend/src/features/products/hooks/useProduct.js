@@ -1,4 +1,4 @@
-import { createProduct, getSellerProducts, getAllProducts, getProductById } from  '../services/product.api.js'
+import { createProduct, getSellerProducts, getAllProducts, getProductById, addProductVariant } from  '../services/product.api.js'
 import { useDispatch } from 'react-redux'
 import { setSellerProducts, setProducts } from '../state/product.slice.js'
 

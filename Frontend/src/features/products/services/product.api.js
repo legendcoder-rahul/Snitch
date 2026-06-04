@@ -33,7 +33,7 @@ export async function addProductVariant(productId, newProductVariant) {
         formData.append('images', image.file)
     })
 
-    formData.append('priceAmount', newProductVariant.priceAmount)
+    formData.append('priceAmount', newProductVariant.price)
     formData.append('stock', newProductVariant.stock)
     formData.append('attributes', JSON.stringify(newProductVariant.attributes))
 
