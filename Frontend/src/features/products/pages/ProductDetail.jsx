@@ -11,9 +11,12 @@ const ProductDetail = () => {
     const [addedToCart, setAddedToCart] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
+    const [relatedProducts, setRelatedProducts] = useState([]);
     const navigate = useNavigate();
     const { handleGetProductById } = useProduct();
     const { handleAddToCart } = useCart();
+    const { handleGetRelatedProducts } = useProduct();
+
 
     async function fetchProductDetails() {
         try {
@@ -88,6 +91,20 @@ const ProductDetail = () => {
             console.error('Add to cart failed', err);
         }
     };
+
+    useEffect(() => {
+        async function fetchRelated() {
+            try {
+                const data = await handleGetRelatedProducts(productId)
+                setRelatedProducts(data || [])
+            } catch (error) {
+                console.error("Failed to fetch related products", error)
+            }
+        }
+        if (productId) {
+            fetchRelated()
+        }
+    }, [productId])
 
     if (!product) {
         return (
@@ -579,22 +596,33 @@ const ProductDetail = () => {
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                            {Array(4).fill(null).map((_, i) => (
-                                <div key={i} className="rel-card">
-                                    <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden rounded-sm">
+                            {relatedProducts?.map((relatedProduct, i) => (
+                                <div 
+                                    key={relatedProduct?._id || i} 
+                                    className="rel-card cursor-pointer group"
+                                    onClick={() => {
+                                        if (relatedProduct?._id) {
+                                            navigate(`/product/${relatedProduct._id}`);
+                                            window.scrollTo(0, 0);
+                                        }
+                                    }}
+                                >
+                                    <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden rounded-sm relative">
                                         <img
-                                            src={`https://placehold.co/300x400/f3f4f6/9ca3af?text=Product+${i + 1}`}
-                                            alt={`Related ${i + 1}`}
-                                            className="w-full h-full object-cover"
+                                            src={relatedProduct?.images?.[0]?.url || '/snitch_editorial_warm.png'}
+                                            alt={relatedProduct?.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-900 mb-1">Product Name</p>
+                                    <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-black transition-colors">
+                                        {relatedProduct?.title}
+                                    </p>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm font-bold text-gray-900">
-                                            {displayPrice?.currency} {(displayPrice?.amount || 56)?.toLocaleString()}
+                                            {relatedProduct?.price?.currency || 'INR'} {(relatedProduct?.price?.amount || 56)?.toLocaleString()}
                                         </span>
                                         <span className="text-sm text-gray-400 line-through">
-                                            {displayPrice?.currency} {Math.round((displayPrice?.amount || 56) * 1.5)?.toLocaleString()}
+                                            {relatedProduct?.price?.currency || 'INR'} {Math.round((relatedProduct?.price?.amount || 56) * 1.5)?.toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

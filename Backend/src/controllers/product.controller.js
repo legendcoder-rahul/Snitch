@@ -163,3 +163,32 @@ export async function addProductVariant(req, res) {
     })
 
 }
+
+export async function getRelatedProducts(req, res) {
+    const { id } = req.params
+    const product  = await productModel.findById(id)
+    if(!product) {
+        return res.status(404).json({
+            message: "Product not found",
+            success: false
+        })
+    }
+
+    let related = await productModel.find({
+        _id: { $ne: id },
+        seller: product.seller,
+    }).limit(4)
+
+    if (related.length < 4) {
+        const fallback = await productModel.find({
+            _id: { $ne: id, $nin: related.map(p => p._id) }
+        }).limit(4 - related.length)
+        related = [...related, ...fallback]
+    }
+    
+    res.json({
+        success: true,
+        message: "Related products fetched successfully",
+        products: related
+    })
+}
