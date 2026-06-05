@@ -1,16 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router';
 import { setUser } from '../../auth/state/auth.slice';
+import ProfileIcon from '../../../assets/ProfileIcon.png'
 
 const Nav = () => {
     const user = useSelector(state => state.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleLogout = () => {
         dispatch(setUser(null));
         navigate('/login');
+    };
+
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            navigate(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchQuery('');
+        }
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
     };
 
     return (
@@ -30,8 +45,11 @@ const Nav = () => {
                     type="text"
                     placeholder="Search product or brand here..."
                     className="flex-1 px-4 py-2 outline-none text-xs md:text-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
                 />
-                <button className="px-4 text-gray-500 hover:text-black">
+                <button onClick={handleSearch} className="px-4 text-gray-500 hover:text-black">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
             </div>
@@ -49,7 +67,7 @@ const Nav = () => {
 
                 {user ? (
                     <div className="flex items-center gap-2 md:gap-4">
-                        {user.isSeller && (
+                        {user.role === 'seller' && (
                             <button 
                                 onClick={() => navigate('/seller/dashboard')}
                                 className="text-xs md:text-sm font-semibold text-gray-700 hover:text-black px-2 md:px-3 py-1.5 rounded-md hover:bg-gray-100 transition"

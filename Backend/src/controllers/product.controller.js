@@ -3,35 +3,40 @@ import { uploadFile } from "../services/storage.service.js";
 
 
 export async function createProduct(req, res) {
+    try {
+        const { title, description, priceAmount, priceCurrency } = req.body;
+        const seller = req.user;
 
-    const { title, description, priceAmount, priceCurrency } = req.body;
-    const seller = req.user;
+        const uploadResults = await Promise.all(req.files.map(async (file) => {
+            return await uploadFile(file.buffer, file.originalname)
+        }))
 
-    const images = await Promise.all(req.files.map(async (file) => {
-        return await uploadFile({
-            buffer: file.buffer,
-            fileName: file.originalname
+        const images = uploadResults.map(result => ({ url: result.url }))
+
+        const product = await productModel.create({
+            title,
+            description,
+            price: {
+                amount: priceAmount,
+                currency: priceCurrency || "INR"
+            },
+            images,
+            seller: seller._id
         })
-    }))
 
-
-    const product = await productModel.create({
-        title,
-        description,
-        price: {
-            amount: priceAmount,
-            currency: priceCurrency || "INR"
-        },
-        images,
-        seller: seller._id
-    })
-
-
-    res.status(201).json({
-        message: "Product created successfully",
-        success: true,
-        product
-    })
+        res.status(201).json({
+            message: "Product created successfully",
+            success: true,
+            product
+        })
+    } catch (error) {
+        console.error('Error creating product:', error);
+        res.status(500).json({
+            message: "Failed to create product",
+            success: false,
+            error: error.message
+        })
+    }
 }
 
 export async function getSellerProducts(req, res) {
@@ -55,6 +60,37 @@ export async function getAllProducts(req, res) {
         success: true,
         products
     })
+}
+
+export async function searchProducts(req, res) {
+    try {
+        const { q } = req.query;
+        if (!q || !q.trim()) {
+            const products = await productModel.find();
+            return res.status(200).json({
+                message: "All products",
+                success: true,
+                products
+            });
+        }
+
+        const products = await productModel.find({
+            title: { $regex: q.trim(), $options: 'i' }
+        });
+
+        return res.status(200).json({
+            message: "Search results",
+            success: true,
+            products
+        });
+    } catch (error) {
+        console.error('Search error:', error);
+        return res.status(500).json({
+            message: "Search failed",
+            success: false,
+            error: error.message
+        });
+    }
 }
 
 export async function getProductDetails(req, res) {
@@ -94,15 +130,12 @@ export async function addProductVariant(req, res) {
     }
 
     const files = req.files;
-    const images = [];
-    if (files || files.length !== 0) {
-        (await Promise.all(files.map(async (file) => {
-            const image = await uploadFile({
-                buffer: file.buffer,
-                fileName: file.originalname
-            })
-            return image
-        }))).map(image => images.push(image))
+    let images = [];
+    if (files && files.length > 0) {
+        const uploadResults = await Promise.all(files.map(async (file) => {
+            return await uploadFile(file.buffer, file.originalname)
+        }))
+        images = uploadResults.map(result => ({ url: result.url }))
     }
 
     const price = req.body.priceAmount

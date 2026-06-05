@@ -425,9 +425,9 @@ const ProductDetail = () => {
                             <button
                                 className="btn-cart mb-4 rounded-sm"
                                 onClick={onAddToCart}
-                                disabled={hasVariants ? (!activeVariant || !inStock) : false}
+                                disabled={activeVariant && !inStock}
                             >
-                                {addedToCart ? '✓ Added to Cart' : hasVariants && !activeVariant ? 'Select Options' : !inStock ? 'Out of Stock' : 'Add to Cart'}
+                                {addedToCart ? '✓ Added to Cart' : activeVariant && !inStock ? 'Out of Stock' : 'Add to Cart'}
                             </button>
 
                             {/* Action links */}

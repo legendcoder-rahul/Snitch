@@ -126,13 +126,13 @@ const Home = () => {
                             </p>
                             <div className="flex gap-4 flex-wrap">
                                 <button
-                                    onClick={() => navigate('/shop')}
+                                    onClick={() => navigate('/explore')}
                                     className="px-8 py-3.5 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition"
                                 >
                                     Buy Product
                                 </button>
                                 <button
-                                    onClick={() => navigate('/shop')}
+                                    onClick={() => navigate('/explore')}
                                     className="px-8 py-3.5 border border-black text-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition"
                                 >
                                     Explore Product
@@ -185,7 +185,7 @@ const Home = () => {
                             <div className="absolute bottom-6 left-6">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Women Collection</p>
                                 <h3 className="text-xl font-black text-gray-900 mb-3">Stylish Winter<br />T-Shirt for Woman</h3>
-                                <button className="px-5 py-2 bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-black hover:text-white transition">
+                                <button onClick={() => navigate('/explore')} className="px-5 py-2 bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-black hover:text-white transition">
                                     Explore Now
                                 </button>
                             </div>
@@ -199,7 +199,7 @@ const Home = () => {
                                 className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-500"
                             />
                             <div className="absolute bottom-6 left-6">
-                                <button className="px-5 py-2 bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-yellow-400 transition">
+                                <button onClick={() => navigate('/explore')} className="px-5 py-2 bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-yellow-400 transition">
                                     Explore Now
                                 </button>
                             </div>
@@ -212,7 +212,7 @@ const Home = () => {
                                 <div className="p-4 flex-1">
                                     <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">Women Collection</p>
                                     <h3 className="text-sm font-black text-gray-900 mb-2">Stylish Winter T-Shirt for Woman</h3>
-                                    <button className="px-3 py-1.5 border border-gray-900 text-[10px] font-bold uppercase tracking-wider hover:bg-gray-900 hover:text-white transition">
+                                    <button onClick={() => navigate('/explore')} className="px-3 py-1.5 border border-gray-900 text-[10px] font-bold uppercase tracking-wider hover:bg-gray-900 hover:text-white transition">
                                         Check Now
                                     </button>
                                 </div>
@@ -228,7 +228,7 @@ const Home = () => {
                                 <div className="p-4 flex-1">
                                     <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">Men Collection</p>
                                     <h3 className="text-sm font-black text-gray-900 mb-2">Stylish Winter Shirt for Man</h3>
-                                    <button className="px-3 py-1.5 border border-gray-900 text-[10px] font-bold uppercase tracking-wider hover:bg-gray-900 hover:text-white transition">
+                                    <button onClick={() => navigate('/explore')} className="px-3 py-1.5 border border-gray-900 text-[10px] font-bold uppercase tracking-wider hover:bg-gray-900 hover:text-white transition">
                                         Check Now
                                     </button>
                                 </div>
@@ -441,7 +441,7 @@ const Home = () => {
                             <p className="text-sm text-gray-400 leading-relaxed mb-8 max-w-sm">
                                 Explore our curated clothing collection — designed for the modern individual who refuses to blend in. From statement outerwear to everyday essentials, every piece tells a story.
                             </p>
-                            <button className="px-8 py-3.5 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-yellow-400 transition">
+                            <button onClick={() => navigate('/explore')} className="px-8 py-3.5 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-yellow-400 transition">
                                 Explore Collection
                             </button>
                         </div>

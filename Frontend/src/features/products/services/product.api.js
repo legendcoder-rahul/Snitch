@@ -25,6 +25,11 @@ export async function getProductById(productId) {
     return response.data
 }
 
+export async function searchProducts(query) {
+    const response = await productApiInstance.get(`/search?q=${encodeURIComponent(query)}`)
+    return response.data
+}
+
 export async function addProductVariant(productId, newProductVariant) {
 
     const formData = new FormData()
