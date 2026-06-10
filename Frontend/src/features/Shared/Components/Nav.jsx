@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router';
 import { setUser } from '../../auth/state/auth.slice';
-import ProfileIcon from '../../../assets/ProfileIcon.png'
 
 const Nav = () => {
     const user = useSelector(state => state.auth.user);

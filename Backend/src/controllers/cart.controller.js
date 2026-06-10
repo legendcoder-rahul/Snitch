@@ -9,8 +9,6 @@ import paymentModel from "../models/payment.model.js";
 import { config } from "../config/config.js";
 
 
-
-
 export const addToCart = async (req, res) => {
 
     const { productId, variantId } = req.params

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useCart } from '../hook/useCart'
 import { Link, useNavigate } from 'react-router'
+import { useRazorpay } from 'react-razorpay'
 
 const Cart = () => {
     const cart = useSelector(state => state.cart)
     const { handleGetCart, handleIncrementCartItem } = useCart()
     const navigate = useNavigate()
     const user = useSelector(state => state.auth.user)
+    const { error, isLoading, Razorpay } = useRazorpay();
 
     const [quantities, setQuantities] = useState({})
 
@@ -26,6 +28,33 @@ const Cart = () => {
             setQuantities(qMap)
         }
     }, [cart?.items])
+
+    const handlePayment = () => {
+    const options = {
+      key: "YOUR_RAZORPAY_KEY",
+      amount: 50000, // Amount in paise
+      currency: "INR",
+      name: "Test Company",
+      description: "Test Transaction",
+      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
+      handler: (response) => {
+        console.log(response);
+        alert("Payment Successful!");
+      },
+      prefill: {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        contact: "9999999999",
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+  };
+
 
     const changeQty = (id, delta) => {
         setQuantities(prev => ({
@@ -57,9 +86,7 @@ const Cart = () => {
         || cart?.items?.[0]?.product?.price?.currency
         || 'INR'
 
-    const handleCheckout = () => {
-        alert("Checkout feature coming soon!")
-    }
+  
 
     /* ─── Empty state ─── */
     if (!cart?.items?.length) {
@@ -272,7 +299,7 @@ const Cart = () => {
 
                             {/* CTAs */}
                             <button
-                                onClick={handleCheckout}
+                                onClick={handlePayment}
                                 className="w-full py-4 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition mb-3"
                             >
                                 Proceed to Checkout

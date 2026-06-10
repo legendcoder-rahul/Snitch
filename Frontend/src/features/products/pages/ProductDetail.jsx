@@ -29,7 +29,7 @@ const ProductDetail = () => {
 
     useEffect(() => { fetchProductDetails(); }, [productId]);
 
-    // Don't pre-select any attributes — let the user choose
+    // Reset selection when product changes — base product (no variant) is shown by default
     useEffect(() => {
         setSelectedAttributes({});
     }, [product]);
@@ -79,11 +79,8 @@ const ProductDetail = () => {
     };
 
     const onAddToCart = async () => {
-        if (hasVariants && !activeVariant) {
-            alert('Please select all options (color, size, etc.) before adding to cart.');
-            return;
-        }
         try {
+            // If a variant is selected, add with variantId; otherwise add base product
             await handleAddToCart(product._id, activeVariant?._id);
             setAddedToCart(true);
             setTimeout(() => setAddedToCart(false), 2000);
