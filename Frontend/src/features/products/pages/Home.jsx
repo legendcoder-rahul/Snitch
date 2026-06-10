@@ -9,24 +9,7 @@ import menTshirt from '../../../assets/t-shirt-m.jfif';
 import newArrival from '../../../assets/new2.jfif';
 
 
-/* ─── Placeholder data ─────────────────────────────── */
-const FLASH_PRODUCTS = [
-    { id: 1, name: "EliteShield Performance Men's Jackets", price: "Rp255.000", oldPrice: "Rp625.000", sold: 9, total: 10, img: "https://placehold.co/400x500/e5e7eb/374151?text=Jacket" },
-    { id: 2, name: "Gentlemen's Summer Gray Hat", price: "Rp99.000", oldPrice: "Rp150.000", sold: 9, total: 10, img: "https://placehold.co/400x500/e5e7eb/374151?text=Hat" },
-    { id: 3, name: "OptiZoom Camera Shoulder Bag", price: "Rp250.000", oldPrice: "Rp425.000", sold: 5, total: 10, img: "https://placehold.co/400x500/e5e7eb/374151?text=Bag" },
-    { id: 4, name: "Cloudy Chic – Grey Peep Toe Heels", price: "Rp270.000", oldPrice: "Rp580.000", sold: 5, total: 10, img: "https://placehold.co/400x500/e5e7eb/374151?text=Shoes" },
-];
-
-const TODAY_PRODUCTS = [
-    { id: 1, name: "UrbanEdge Men's Jeans Collection", rating: 4.9, sold: "10K+", price: "Rp253.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Jeans", tag: "Best Seller" },
-    { id: 2, name: "Essentials Men's Long-Sleeve Oxford Shirt", rating: 4.9, sold: "10K+", price: "Rp179.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Shirt", tag: "Best Seller" },
-    { id: 3, name: "StyleHaven Men's Fashionable Brogues", rating: 4.9, sold: "8K+", price: "Rp199.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Shoes" },
-    { id: 4, name: "Essential Long-Sleeve Crewneck Shirt", rating: 4.9, sold: "5K+", price: "Rp120.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Crewneck" },
-    { id: 5, name: "ClassicGent Men's Formal Shoes", rating: 4.9, sold: "4K+", price: "Rp199.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Formal" },
-    { id: 6, name: "UrbanFlex Men's Short Pants", rating: 4.9, sold: "2K+", price: "Rp162.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Shorts" },
-    { id: 7, name: "ChicCarry – Elegant Women's Tote", rating: 4.9, sold: "500+", price: "Rp650.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Tote" },
-    { id: 8, name: "Sophisticated Women's Parka Line", rating: 4.9, sold: "100+", price: "Rp324.000", img: "https://placehold.co/400x500/e5e7eb/374151?text=Parka" },
-];
+/* ─── Categories & Configuration ──────────────────── */
 
 const CATEGORIES = [
     { label: 'Hoodie', icon: '🧥' },
@@ -79,8 +62,8 @@ const Home = () => {
 
     const pad = n => String(n).padStart(2, '0');
 
-    const flashList = products?.length ? products.slice(0, 4) : FLASH_PRODUCTS;
-    const todayList = products?.length ? products : TODAY_PRODUCTS;
+    const flashList = products?.slice(0, 4) || [];
+    const todayList = products || [];
 
     const mapProduct = (p, isFlash = false) => {
         const isReal = !!p._id;
